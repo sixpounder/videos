@@ -33,6 +33,7 @@ public class Audience.Window : Gtk.Window {
     private Gtk.SearchEntry search_entry;
     private WelcomePage welcome_page;
     private ZeitgeistManager zeitgeist_manager;
+    private Audience.Services.ServiceBrowser service_browser;
 
     public enum NavigationPage { WELCOME, LIBRARY, EPISODES }
 
@@ -49,6 +50,7 @@ public class Audience.Window : Gtk.Window {
 
     construct {
         zeitgeist_manager = new ZeitgeistManager ();
+
         window_position = Gtk.WindowPosition.CENTER;
         gravity = Gdk.Gravity.CENTER;
         set_default_size (1000, 680);
@@ -245,6 +247,13 @@ public class Audience.Window : Gtk.Window {
             show_mouse_cursor ();
             return Gdk.EVENT_PROPAGATE;
         });
+
+        // Device discovery service
+        service_browser = Audience.Services.ServiceBrowser.get_default ();
+        service_browser.new_device.connect ((device) => {
+            stdout.printf ("Device found: %s\n", device.name);
+        });
+        service_browser.start ();
     }
 
     /** Returns true if the code parameter matches the keycode of the keyval parameter for
