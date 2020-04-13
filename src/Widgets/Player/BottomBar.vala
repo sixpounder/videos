@@ -27,13 +27,17 @@ public class Audience.Widgets.BottomBar : Gtk.Revealer {
     public signal void unfullscreen ();
     public signal void seeked (double val);
 
+    private Audience.Services.ServiceBrowser service_browser;
+
     public SettingsPopover preferences_popover;
     public PlaylistPopover playlist_popover;
     public TimeWidget time_widget;
+    public CastPopover cast_popover;
 
     private Gtk.Button play_button;
     private Gtk.Button preferences_button;
     private Gtk.Button playlist_button;
+    private Gtk.Button cast_button;
     private Gtk.Revealer unfullscreen_revealer;
     private uint hiding_timer = 0;
     private bool playlist_glowing = false;
@@ -99,6 +103,15 @@ public class Audience.Widgets.BottomBar : Gtk.Revealer {
         }
     }
 
+    public bool show_cast_button {
+        get {
+            return cast_button.visible;
+        }
+        set {
+            cast_button.visible = value;
+        }
+    }
+
     public BottomBar (ClutterGst.Playback playback) {
         this.events |= Gdk.EventMask.POINTER_MOTION_MASK;
         this.events |= Gdk.EventMask.LEAVE_NOTIFY_MASK;
@@ -136,6 +149,15 @@ public class Audience.Widgets.BottomBar : Gtk.Revealer {
             playlist_popover.queue_resize ();
         });
 
+        cast_button = new Gtk.Button.from_icon_name ("computer-symbolic", Gtk.IconSize.BUTTON);
+        cast_button.tooltip_text = _("Cast");
+        cast_button.clicked.connect (() => {
+            cast_popover.popup ();
+        });
+
+        cast_popover = new CastPopover ();
+        cast_popover.relative_to = cast_button;
+
         preferences_button = new Gtk.Button.from_icon_name ("open-menu-symbolic", Gtk.IconSize.BUTTON);
         preferences_button.tooltip_text = _("Settings");
         preferences_button.clicked.connect (() => {
@@ -155,6 +177,7 @@ public class Audience.Widgets.BottomBar : Gtk.Revealer {
         main_actionbar.set_center_widget (time_widget);
         main_actionbar.pack_end (preferences_button);
         main_actionbar.pack_end (playlist_button);
+        main_actionbar.pack_end (cast_button);
         add (main_actionbar);
 
         playlist_popover.playlist.item_added.connect (() => {
@@ -172,8 +195,20 @@ public class Audience.Widgets.BottomBar : Gtk.Revealer {
         unfullscreen_revealer.add (unfullscreen_button);
         unfullscreen_revealer.show_all ();
 
+        // Get service browser instance
+        service_browser = Audience.Services.ServiceBrowser.get_default ();
+        service_browser.new_device.connect (() => {
+            update_cast_devices ();
+        });
+
+        service_browser.removed_device.connect (() => {
+            update_cast_devices ();
+        });
+
         show_all ();
     }
+
+    private void update_cast_devices () {}
 
     private void playlist_item_added () {
         if (!playlist_glowing) {

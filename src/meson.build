@@ -7,10 +7,13 @@ executable(
     'Window.vala',
     'ZeitgeistManager.vala',
     'Objects/Video.vala',
+    'Objects/Device.vala',
     'Services/DirectoryMonitoring.vala',
     'Services/Inhibitor.vala',
     'Services/LibraryManager.vala',
     'Services/Thumbnailer.vala',
+    'Services/ServiceBrowser.vala',
+    'Services/CastSocketClient.vala',
     'Widgets/NavigationButton.vala',
     'Widgets/UnsupportedFileDialog.vala',
     'Widgets/WelcomePage.vala',
@@ -24,7 +27,12 @@ executable(
     'Widgets/Player/PlaylistPopover.vala',
     'Widgets/Player/PreviewPopover.vala',
     'Widgets/Player/SettingsPopover.vala',
+    'Widgets/Player/CastPopover.vala',
     'Widgets/Player/TimeWidget.vala',
+    'Protobuf/Protobuf.vala',
+    'Protobuf/AuthorityKeys.pb.vala',
+    'Protobuf/CastChannel.pb.vala',
+    'Protobuf/Logging.pb.vala',
 
     vala_args: [
         '--enable-experimental',
@@ -44,6 +52,8 @@ executable(
         dependency('gstreamer-video-1.0'),
         dependency('gstreamer-tag-1.0'),
         dependency('gtk+-3.0', version: '>=3.22'),
+        dependency('avahi-gobject'),
+        dependency('avahi-client'),
 
         meson.get_compiler('vala').find_library('posix'),
         meson.get_compiler('c').find_library('m', required : false)

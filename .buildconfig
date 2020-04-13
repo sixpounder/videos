@@ -1,0 +1,10 @@
+[default]
+name=Default
+runtime=host
+config-opts=
+run-opts=
+prefix=/home/sixpounder/.cache/gnome-builder/install/elementary-videos/host
+app-id=
+postbuild=
+prebuild=
+default=true
