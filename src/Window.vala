@@ -250,9 +250,6 @@ public class Audience.Window : Gtk.Window {
 
         // Device discovery service
         service_browser = Audience.Services.ServiceBrowser.get_default ();
-        service_browser.new_device.connect ((device) => {
-            stdout.printf ("Device found: %s\n", device.name);
-        });
         service_browser.start ();
     }
 

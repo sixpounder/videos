@@ -19,16 +19,16 @@ namespace Audience.Services {
         private MainLoop discovery_loop;
         private Thread<void*> discovery_thread;
 
-        public Gee.ArrayList<Audience.Objects.Device> devices { get; private set; }
+        public Gee.ArrayList<Audience.Objects.Cast.Device> devices { get; private set; }
 
         /* Signals */
-        public signal void new_device (Audience.Objects.Device device);
-        public signal void removed_device (Audience.Objects.Device device);
+        public signal void new_device (Audience.Objects.Cast.Device device);
+        public signal void removed_device (Audience.Objects.Cast.Device device);
 
         private ServiceBrowser () {}
 
         construct {
-            devices = new Gee.ArrayList<Audience.Objects.Device> ();
+            devices = new Gee.ArrayList<Audience.Objects.Cast.Device> ();
         }
 
         public void start () {
@@ -62,17 +62,45 @@ namespace Audience.Services {
         }
 
         public void on_found (Avahi.Interface @interface, Avahi.Protocol protocol, string name, string type, string domain, string hostname, Avahi.Address? address, uint16 port, Avahi.StringList? txt) {
-            stdout.printf ("Found name %s, type %s, port %u, address %s, additional records: %s\n\n", name, type, port, address.to_string (), txt != null ? txt.to_string () : "NONE");
-            Audience.Objects.Device dev = new Audience.Objects.Device (
+
+            string t_friendly_name, t_device_type_id;
+
+            if (txt != null) {
+                string fn_key;
+                char[] fn_value;
+                txt.find ("fn").copy ().get_pair (out fn_key, out fn_value);
+                if (fn_key != null && fn_value != null) {
+                    t_friendly_name = (string) fn_value;
+                } else {
+                    t_friendly_name = name;
+                }
+
+                string md_key;
+                char[] md_value;
+                txt.find ("md").copy ().get_pair (out md_key, out md_value);
+                if (md_key != null && md_value != null) {
+                    t_device_type_id = (string) md_value;
+                } else {
+                    t_device_type_id = "Chromecast";
+                }
+
+            } else {
+                t_friendly_name = name;
+                t_device_type_id = "Chromecast";
+            }
+
+            var dev = new Audience.Objects.Cast.Device (
                 name,
                 address.to_string (),
-                port
+                port,
+                t_device_type_id
             );
 
-            dev.set_properties (txt.to_string ());
+            dev.friendly_name = t_friendly_name;
+
+            // debug ("%s", dev.to_string ());
 
             devices.add (dev);
-
             new_device (dev);
         }
 
